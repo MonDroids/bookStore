@@ -13,13 +13,11 @@ app.get('/', (req, res) => {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => {
-        console.log('MongoDB холболт амжилттай!');
-        app.listen(PORT, () => {
-            console.log(`Сервер ${PORT} порт дээр ажиллаж байна.`);
-        });
-    })
-    .catch((err) => {
-        console.error('MongoDB холболт алдаа:', err);
-    });
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+}).then(() => {
+    console.log('MongoDB амжилттай холбогдлоо!');
+}).catch((err) => {
+    console.error('MongoDB холболтод алдаа гарлаа:', err);
+});
