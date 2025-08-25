@@ -42,4 +42,11 @@ const bookScheme = new mongoose.Schema({
         type: String,
         required: false
     },
-});
+},
+    {
+        timestamps: true,
+    }
+);
+
+const Book = mongoose.model('Book', bookScheme);
+module.exports = Book;
