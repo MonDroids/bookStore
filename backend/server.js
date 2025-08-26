@@ -18,18 +18,20 @@ app.get('/', (req, res) => {
 app.get('/test-add-book', async (req, res) => {
     try {
         const newBook = new Book({
-            title: 'Тестийн ном',
-            author: 'Тестийн зохиолч',
-            year: 2023,
-            price: 10000,
-            description: 'Энэ бол тестийн номын тайлбар.',
-        });
+    title: 'Тестийн ном',
+    author: 'Тестийн зохиолч',
+    year: 2023,
+    price: 10000,
+    publishedDate: new Date(),
+    genre: 'Шинжлэх ухаан',
+    description: 'Энэ бол тестийн номын тайлбар.',
+});
         const savedBook = await newBook.save();
         res.status(201).json(savedBook);
     } catch (error) {
-        console.error('Ном нэмэхэд алдаа гарлаа:', error);
-        res.status(400).json({ error: 'Ном нэмэхэд алдаа гарлаа.' });
-    } 
+    console.error('Ном нэмэхэд алдаа гарлаа:', error);
+    res.status(400).json({ error: error.message });
+}
 });
 
 // Connect to MongoDB
