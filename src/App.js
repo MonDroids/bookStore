@@ -49,6 +49,33 @@ function App() {
       });
   };
 
+  // Номын мэдээллийг устгах функц
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5005/api/books/${id}`);
+      console.log("Ном амжилттай устгагдлаа");
+      fetchBooks();
+    } catch (error) {
+      console.error("Номыг устгахад алдаа гарлаа:", error);
+    }
+  };
+
+  // Номын мэдээллийг шинэчлэх функц
+  const [editingBook, setEditingBook] = useState(null);
+
+  const handleEdit = (book) => {
+    setEditingBook(book);
+    setTitle(book.title);
+    setAuthor(book.author);
+    setGenre(book.genre);
+    setPublishedDate(book.publishedDate);
+    setYear(book.year);
+    setIsAvailable(book.isAvailable);
+    setCreatedAt(book.createdAt);
+    setUpdatedAt(book.updatedAt);
+    setPrice(book.price);
+  };
+
   return (
     <div className="App">
       <h1>Ном нэмэх</h1>
@@ -124,6 +151,13 @@ function App() {
             <p>Зохиолч: {book.author}</p>
             <p>Төрөл: {book.genre}</p>
             <p>Үнэ: {book.price}$</p>
+            <p>Нийтлэгдсэн огноо: {new Date(book.publishedDate).toLocaleDateString()}</p>
+            <p>Жил: {book.year}</p>
+            <p>Бэлэн байгаа эсэх: {book.isAvailable ? "Тийм" : "Үгүй"}</p>
+            <p>Огноо: {new Date(book.createdAt).toLocaleDateString()}</p>
+            <p>Огноо: {new Date(book.updatedAt).toLocaleDateString()}</p>
+        <button type="button" onClick={() => setEditingBook(book)}>Засах</button>
+        <button type="button" onClick={() => handleDelete(book._id)}>Устгах</button>
           </li>
         ))}
       </ul>
