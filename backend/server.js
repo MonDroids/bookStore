@@ -3,16 +3,20 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 const Book = require('./model/Book');
-
+const bookRoutes = require('./routes/bookRoutes');
 const app = express();
 const PORT = process.env.PORT || 5005;
 
-// Get routes
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Use routes
+app.use('/api/books', bookRoutes);
 
 app.get('/', (req, res) => {
     res.send('Номын дэлгүүрийн API ажиллаж байна!');
     res.sendStatus(200);
-    console.log(`http://localhost:${PORT} server ene port dr ajillaj bn!`);
 });
 // Tur zuuriin data
 app.get('/test-add-book', async (req, res) => {
@@ -46,3 +50,4 @@ mongoose.connect(process.env.MONGO_URI, {
 }).catch((err) => {
     console.error('MongoDB холболтод алдаа гарлаа:', err);
 });
+
