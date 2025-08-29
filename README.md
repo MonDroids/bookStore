@@ -1,74 +1,322 @@
-<<<<<<< HEAD
-# Getting Started with Create React App
+# Номын дэлгүүрийн API (Дэлгэрэнгүй тайлбартай)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Энэ төсөл нь Express.js болон MongoDB ашиглан бүтээсэн номын дэлгүүрийн backend API юм. Доор бүх кодын мөр бүрийн дэлгэрэнгүй тайлбар болон өөрчлөлтийн түүхийг орууллаа.
 
-## Available Scripts
+## Төслийн бүтэц
 
-In the project directory, you can run:
+- backend/
+  - server.js
+  - model/Book.js
+  - controllers/bookController.js
+  - routes/bookRoutes.js
+- .env
+- .gitignore
+- README.md
 
-### `npm start`
+## Сүүлийн өөрчлөлтүүдийн тайлбар
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Бүх кодын мөр бүрт монгол хэл дээр дэлгэрэнгүй тайлбар нэмсэн.
+- Алдааны мэдээллийг илүү дэлгэрэнгүй харуулах боломжтой болгосон.
+- Бүх route, controller, model, server-ийн бүтэц, холболтын логикыг тайлбарласан.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Кодын дэлгэрэнгүй тайлбар
 
-### `npm test`
+### frontend/src/App.js
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Энд React ашигласан frontend-ийн үндсэн код байна. Доорх мөр бүрийн тайлбарыг үзнэ үү:
 
-### `npm run build`
+```javascript
+// React-ийн useEffect, useState hook-уудыг импортлох
+import { useEffect, useState } from 'react';
+// Axios-г импортлох (API-д хүсэлт явуулахад ашиглана)
+import axios from 'axios';
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+function App() {
+  // books: номын жагсаалт, setBooks: жагсаалтыг шинэчлэх функц
+  const [books, setBooks] = useState([]);
+  // title, author, year: шинэ ном нэмэхэд ашиглах утгууд
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [year, setYear] = useState('');
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+  // Номын жагсаалтыг авах функц
+  const fetchBooks = async () => {
+    try {
+      // Backend API-аас номын жагсаалт авах
+      const response = await axios.get('http://localhost:5005/api/books');
+      setBooks(response.data); // Хариу ирвэл жагсаалтыг шинэчлэх
+    } catch (error) {
+      // Алдаа гарвал консолд хэвлэх
+      console.error('Номын жагсаалтыг авахад алдаа гарлаа:', error);
+    }
+  };
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  // Компонент ачаалагдахад fetchBooks-г нэг удаа дуудах
+  useEffect(() => {
+    fetchBooks();
+  }, []);
 
-### `npm run eject`
+  // Ном нэмэх форм submit хийхэд дуудагдах функц
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Form default үйлдлийг зогсоох
+    // Шинэ номын объект үүсгэх
+    const newBook = { title, author, year: Number(year) };
+    try {
+      // Backend API руу POST хүсэлтээр ном нэмэх
+      const response = await axios.post(
+        'http://localhost:5005/api/books',
+        newBook
+      );
+      console.log('Ном амжилттай нэмэгдлээ:', response.data);
+      fetchBooks(); // Ном нэмсний дараа жагсаалтыг шинэчлэх
+      setTitle('');
+      setAuthor('');
+      setYear('');
+    } catch (error) {
+      // Алдаа гарвал консолд хэвлэх
+      console.error('Ном нэмэхэд алдаа гарлаа:', error);
+    }
+  };
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+  // JSX: UI-ийг буцаах
+  return (
+    <div>
+      <h1>Номын жагсаалт</h1>
+      {/* Ном нэмэх форм */}
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Номын нэр"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Зохиогчийн нэр"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          required
+        />
+        <input
+          type="number"
+          placeholder="Хэвлэгдсэн он"
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          required
+        />
+        <button type="submit">Нэмэх</button>
+      </form>
+      <h2>Бүх ном</h2>
+      {/* Номын жагсаалтыг харуулах */}
+      <ul>
+        {books.map((book) => (
+          <li key={book._id}>
+            {book.title}- {book.author} ({book.year})
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+export default App;
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Энд серверийн үндсэн код байна. Доорх мөр бүрийн тайлбарыг үзнэ үү:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```javascript
+// Express.js-г импортлох (Node.js-д сервер үүсгэхэд ашиглана)
+const express = require('express');
+// Mongoose-г импортлох (MongoDB-тэй холбогдох, өгөгдөл хадгалах)
+const mongoose = require('mongoose');
+// CORS-г импортлох (өөр домэйнээс хүсэлт авах боломжтой болгоно)
+const cors = require('cors');
+// Орчны хувьсагчдыг (.env файлаас) ачаалах
+require('dotenv').config();
+// Book моделийг импортлох (номын өгөгдлийн бүтэц)
+const Book = require('./model/Book');
+// Номтой холбоотой route-уудыг импортлох
+const bookRoutes = require('./routes/bookRoutes');
 
-## Learn More
+// Express апп үүсгэх
+const app = express();
+// Серверийн портын дугаарыг тохируулах (орчны хувьсагчаас авах, байхгүй бол 5005)
+const PORT = process.env.PORT || 5005;
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+// CORS middleware ашиглах (API-д өөр домэйнээс хүсэлт авах боломж)
+app.use(cors());
+// JSON хүсэлтийг зөвшөөрөх middleware (body-г JSON хэлбэрээр хүлээн авах)
+app.use(express.json());
+// /api/books замд bookRoutes-г ашиглах (номтой холбоотой route-ууд)
+app.use('/api/books', bookRoutes);
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+// Үндсэн хуудасны GET хүсэлтэд хариу өгөх (API ажиллаж байгаа эсэхийг шалгах)
+app.get('/', (req, res) => {
+  // Хариу илгээх
+  res.send('Номын дэлгүүрийн API ажиллаж байна!');
+});
 
-### Code Splitting
+// Туршилтын ном нэмэх route (MongoDB-д ном нэмэх жишээ)
+app.get('/test-add-book', async (req, res) => {
+  try {
+    // Шинэ ном үүсгэх
+    const newbook = new Book({
+      title: 'Стив Жобс',
+      author: 'Стив Жобс',
+      year: 2015,
+    });
+    // Номыг хадгалах
+    const savedBook = await newbook.save();
+    // Амжилттай бол 201 статус илгээх
+    res.status(201).json(savedBook);
+  } catch (error) {
+    // Алдаа гарвал 400 статус илгээх, алдааны мессеж буцаах
+    res.status(400).json({ error: error.message });
+  }
+});
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+// MongoDB-тэй холбогдох (серверийг ажиллуулах)
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    // Холболт амжилттай бол
+    console.log('MongoDB холболт амжилттай!');
+    // Серверийг сонсох
+    app.listen(PORT, () => {
+      // Сервер амжилттай ажиллаж эхэлсэн тухай мэдээлэл
+      console.log(`http://localhost:${PORT} Сервер  порт дээр ажиллаж байна!`);
+    });
+  })
+  .catch((err) => {
+    // Холболт амжилтгүй бол алдааг хэвлэх
+    console.error('MongoDB холболт эхлээгүй:', err);
+  });
+```
 
-### Analyzing the Bundle Size
+### backend/model/Book.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Энд номын өгөгдлийн бүтэц, схемийг тодорхойлсон:
 
-### Making a Progressive Web App
+```javascript
+// Mongoose-г импортлох (MongoDB-д өгөгдлийн загвар үүсгэх)
+const mongoose = require('mongoose');
+// Номын схемийг тодорхойлох
+const bookSchema = new mongoose.Schema(
+  {
+    // Номын нэр
+    title: {
+      type: String, // Төрөл нь string
+      required: true, // Заавал байх ёстой
+    },
+    // Зохиогчийн нэр
+    author: {
+      type: String, // Төрөл нь string
+      required: true, // Заавал байх ёстой
+    },
+    // Хэвлэгдсэн он
+    year: {
+      type: Number, // Төрөл нь number
+      required: true, // Заавал байх ёстой
+    },
+  },
+  {
+    // createdAt, updatedAt талбарууд автоматаар нэмэгдэнэ
+    timestamps: true,
+  }
+);
+// Book моделийг үүсгэх (MongoDB collection-д холбох)
+const Book = mongoose.model('Book', bookSchema);
+// Book моделийг экспортлох (бусад файлд ашиглах)
+module.exports = Book;
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### backend/controllers/bookController.js
 
-### Advanced Configuration
+Энд ном нэмэх болон бүх номыг авах controller функцууд байна:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```javascript
+// Book моделийг импортлох (MongoDB collection-оос өгөгдөл авах)
+const Book = require('../model/Book');
 
-### Deployment
+// Ном үүсгэх controller (POST /api/books)
+const createBook = async (req, res) => {
+  try {
+    // Хүсэлтийн body-оос өгөгдөл авах
+    const { title, author, year } = req.body;
+    // Шинэ ном үүсгэх
+    const newBook = new Book({ title, author, year });
+    // Номыг хадгалах
+    const savedBook = await newBook.save();
+    // Амжилттай бол 201 статус илгээх, хадгалсан номын мэдээлэл буцаах
+    res.status(201).json(savedBook);
+  } catch (error) {
+    // Алдаа гарвал 500 статус илгээх, алдааны мессеж буцаах
+    res.status(500).json({ message: error.message });
+  }
+};
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+// Бүх номыг авах controller (GET /api/books)
+const getAllBooks = async (req, res) => {
+  try {
+    // Бүх номыг авах
+    const books = await Book.find();
+    // Амжилттай бол 200 статус илгээх, номын жагсаалт буцаах
+    res.status(200).json(books);
+  } catch (error) {
+    // Алдаа гарвал 500 статус илгээх, алдааны мессеж буцаах
+    res.status(500).json({ message: error.message });
+  }
+};
 
-### `npm run build` fails to minify
+// Controller-уудыг экспортлох (route-д ашиглах)
+module.exports = {
+  createBook,
+  getAllBooks,
+};
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-=======
-# bookStore
->>>>>>> main
+### backend/routes/bookRoutes.js
+
+Энд номтой холбоотой route-уудыг тодорхойлсон:
+
+```javascript
+// Express-г импортлох (route үүсгэхэд ашиглана)
+const express = require('express');
+// Router үүсгэх (route-уудыг бүлэглэх)
+const router = express.Router();
+// Controller-уудыг импортлох (ном нэмэх, авах функцууд)
+const { createBook, getAllBooks } = require('../controllers/bookController');
+// POST /api/books - ном үүсгэх route
+router.post('/', createBook);
+// GET /api/books - бүх номыг авах route
+router.get('/', getAllBooks);
+// Router-ийг экспортлох (server.js-д ашиглах)
+module.exports = router;
+```
+
+## Орчны хувьсагчид
+
+- `MONGODB_URI` — MongoDB холболтын хаяг
+- `PORT` — Серверийн порт (default: 5005)
+
+## Ашиглах заавар
+
+1. Репозиторийг клон хийнэ:
+   ```
+   git clone https://github.com/Hellobraincode-lesson/6.3.2-Bookstore-part-2.git
+   ```
+2. `backend` фолдер руу орж шаардлагатай сангуудыг суулгана:
+   ```
+   cd backend
+   npm install
+   ```
+3. `.env` файлд өөрийн MongoDB URI болон PORT-ыг тохируулна.
+4. Серверийг ажиллуулна:
+   ```
+   node server.js
+   ```
+
+## Лиценз
+
+MIT лицензээр түгээгдэнэ.
